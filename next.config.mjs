@@ -8,6 +8,10 @@ const nextConfig = {
   },
   images: {
     unoptimized: true,
+    domains: ['firebasestorage.googleapis.com', 'images.pexels.com'],
+  },
+  experimental: {
+    esmExternals: 'loose',
   },
 }
 
