@@ -24,10 +24,12 @@ const requiredEnvVars = [
   "NEXT_PUBLIC_FIREBASE_APP_ID",
 ]
 
-const missingEnvVars = requiredEnvVars.filter((envVar) => !process.env[envVar])
+const missingEnvVars = requiredEnvVars.filter((envVar) => !process.env[envVar] || process.env[envVar] === 'your_api_key_here' || process.env[envVar] === 'your_project_id' || process.env[envVar] === 'your_sender_id_here' || process.env[envVar] === 'your_app_id_here' || process.env[envVar] === 'your_measurement_id_here')
 
 if (missingEnvVars.length > 0) {
-  throw new Error(`Missing required Firebase environment variables: ${missingEnvVars.join(", ")}`)
+  console.error(`Missing or placeholder Firebase environment variables: ${missingEnvVars.join(", ")}`)
+  console.error("Please update your .env.local file with actual Firebase configuration values")
+  console.error("You can find these values in your Firebase Console under Project Settings")
 }
 
 // Initialize Firebase only if it hasn't been initialized yet
