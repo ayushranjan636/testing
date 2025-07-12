@@ -168,8 +168,6 @@ export function AuthForm({ mode }: AuthFormProps) {
 
       router.push("/dashboard")
     } catch (err: any) {
-      console.error("Social auth error:", err)
-
       switch (err.code) {
         case "auth/popup-closed-by-user":
           setError("Sign-in was cancelled")
@@ -181,6 +179,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           setError("Network error. Please check your connection and try again")
           break
         default:
+          console.error("Social auth error:", err)
           setError(err.message || "Social sign-in failed. Please try again")
       }
     } finally {
