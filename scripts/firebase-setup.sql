@@ -1,0 +1,95 @@
+-- Firebase Firestore Collections Structure
+-- This is a reference for the Firestore database structure
+
+-- Users Collection
+-- Document ID: Firebase Auth UID
+-- Fields:
+-- - email: string
+-- - displayName: string
+-- - photoURL: string (optional)
+-- - bio: string (optional)
+-- - points: number (default: 100)
+-- - createdAt: timestamp
+-- - lastActive: timestamp
+-- - isAdmin: boolean (default: false)
+-- - isBanned: boolean (default: false)
+
+-- Items Collection
+-- Document ID: auto-generated
+-- Fields:
+-- - title: string
+-- - description: string
+-- - category: string
+-- - type: string
+-- - size: string
+-- - condition: string (new, like-new, good, fair)
+-- - tags: array of strings
+-- - images: array of strings (URLs)
+-- - pointValue: number (optional)
+-- - openToSwap: boolean
+-- - ownerId: string (Firebase Auth UID)
+-- - ownerName: string
+-- - status: string (pending, approved, rejected, available, in-transit, completed)
+-- - createdAt: timestamp
+-- - moderationNotes: string (optional)
+-- - riskScore: number (optional)
+
+-- SwapOrders Collection
+-- Document ID: auto-generated
+-- Fields:
+-- - itemId: string
+-- - buyerId: string (Firebase Auth UID)
+-- - sellerId: string (Firebase Auth UID)
+-- - pointsAmount: number
+-- - status: string (pending, confirmed, shipped, delivered, disputed, completed)
+-- - createdAt: timestamp
+-- - shippingInfo: object (optional)
+--   - method: string
+--   - trackingNumber: string (optional)
+--   - address: string
+-- - disputeReason: string (optional)
+
+-- PointsTransactions Collection
+-- Document ID: auto-generated
+-- Fields:
+-- - userId: string (Firebase Auth UID)
+-- - amount: number (positive for earned, negative for spent)
+-- - type: string (earned, spent, expired, refunded)
+-- - reason: string
+-- - relatedOrderId: string (optional)
+-- - createdAt: timestamp
+
+-- Firestore Security Rules
+-- rules_version = '2';
+-- service cloud.firestore {
+--   match /databases/{database}/documents {
+--     // Users can read/write their own user document
+--     match /users/{userId} {
+--       allow read, write: if request.auth != null && request.auth.uid == userId;
+--       allow read: if request.auth != null; // Allow reading other users for display
+--     }
+--     
+--     // Items are readable by all authenticated users
+--     match /items/{itemId} {
+--       allow read: if request.auth != null;
+--       allow create: if request.auth != null && request.auth.uid == resource.data.ownerId;
+--       allow update: if request.auth != null && 
+--         (request.auth.uid == resource.data.ownerId || 
+--          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true);
+--     }
+--     
+--     // Swap orders
+--     match /swapOrders/{orderId} {
+--       allow read, write: if request.auth != null && 
+--         (request.auth.uid == resource.data.buyerId || 
+--          request.auth.uid == resource.data.sellerId ||
+--          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true);
+--     }
+--     
+--     // Points transactions
+--     match /pointsTransactions/{transactionId} {
+--       allow read: if request.auth != null && request.auth.uid == resource.data.userId;
+--       allow create: if request.auth != null; // Server-side only through Cloud Functions
+--     }
+--   }
+-- }
